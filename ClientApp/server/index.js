@@ -1,25 +1,3 @@
-## Dotnet CRA (From template) With SSR
-
-Most of the initial investigation has already been done and documented in this [wonderful write-up](https://medium.com/bucharestjs/upgrading-a-create-react-app-project-to-a-ssr-code-splitting-setup-9da57df2040a), however for my circumstance, I wanted to know how to do this in .NET Core instead of Node. The following steps outline how to get up and running with the template provided by Microsoft. The referenced article explains more in detail what is going on, this is just quickly outlining what to do with .NET.
-
-To start, generate your project and restore your dependencies
-
-    mkdir dotnet-cra-ssr
-    cd dotnet-cra-ssr
-    dotnet new reactredux
-    cd ClientApp
-    npm i
-
-While we are in the `ClientApp` area of the codebase, lets add the dependencies, files, and directory we are going to need.
-
-    npm i aspnet-prerendering@^3.0.1 babel-register babel-preset-es2015 babel-preset-react-app ignore-styles --save
-    mkdir server
-
-Add 2 files to your `server` folder. `index.js` and `bootstrap.js`.
-
-`index.js` should have the following content:
-
-```js
 import path from 'path'
 import fs from 'fs'
 
@@ -72,34 +50,3 @@ export default createServerRenderer((params) => {
         })
     });
 });
-```
-
-`bootstrap.js` should have the following content:
-
-```js
-require('ignore-styles');
-
-require('babel-register')({
-    ignore: [/(node_modules)/],
-    presets: ['es2015', 'react-app']
-});
-
-const prerenderer = require('./index').default;
-
-module.exports = prerenderer
-```
-
-Now we need to make updates to some existing files from the template.
-
-Starting with `ClientApp/src/index.js`, update `ReactDOM.render` to `ReactDOM.hydrate`.
-
-We also need to edit `ClientApp/public/index.html` to have
-
-```html
-<!-- This should alread be here -->
-<div id="root"></div>
-<!-- This is new -->
-<script type="text/javascript" charset="utf-8">
-    window.initialReduxState = {};
-</script>
-```
