@@ -106,6 +106,6 @@ We also need to edit `ClientApp/public/index.html` to have
 
 # TODO
 
--   [ ] Add info on configuring `Startup.cs`
--   [ ] Add info on Razor pages (`Index.cs`, `Index.cshtml`)
+-   [ ] Update README to discuss changes on `Startup.cs` (already configured in this repo)
+-   [ ] Update README to discuss new Razor pages (`Index.cs`, `Index.cshtml`) (already configured in this repo)
 -   [ ] Update handling on client routing 404 and Redirects
