@@ -51,7 +51,7 @@ namespace dotnet_cra_ssr
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa =>
@@ -60,10 +60,6 @@ namespace dotnet_cra_ssr
 
                 if (env.IsDevelopment())
                 {
-                    // uncomment the following line and use `npm run start` from
-                    // a separate console to not have to restart node on backend changes
-                    // spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
-                    // this is for single start-up command. I prefer the line above
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
