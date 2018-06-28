@@ -103,3 +103,9 @@ We also need to edit `ClientApp/public/index.html` to have
     window.initialReduxState = {};
 </script>
 ```
+
+# TODO
+
+-   [ ] Add info on configuring `Startup.cs`
+-   [ ] Add info on Razor pages (`Index.cs`, `Index.cshtml`)
+-   [ ] Update handling on client routing 404 and Redirects
