@@ -6,6 +6,7 @@ import { Provider } from 'react-redux'
 import { renderToString } from 'react-dom/server'
 import { StaticRouter } from 'react-router-dom'
 import { createServerRenderer } from 'aspnet-prerendering'
+import Loadable from 'react-loadable';
 
 import configureStore from '../src/store/configureStore'
 import App from '../src/App'
@@ -20,13 +21,16 @@ export default createServerRenderer((params) => {
                 return rej('no file read')
             }
             const context = {}
+            const modules = [];
             const store = configureStore(null, JSON.parse(params.data))
             const markup = renderToString(
                 <Provider store={store}>
                     <StaticRouter
                         location={params.location.path}
                         context={context}>
-                        <App />
+                        <Loadable.Capture report={m => modules.push(m)}>
+                            <App />
+                        </Loadable.Capture>
                     </StaticRouter>
                 </Provider>
             )
@@ -35,17 +39,22 @@ export default createServerRenderer((params) => {
                 // Somewhere a `<Redirect>` was rendered
                 res({ redirectUrl: context.url });
                 return;
-            } else {
+            } else if (!context.status) {
                 // we're good, send the response
+                const extraChunks = modules.map(x => `<script type="text/javascript" src="/static/js/${x}.chunk.js"></script>\n`);
                 const RenderedApp = htmlData
                     .replace('<div id="root"></div>', `<div id="root">${markup}</div>`)
                     .replace('initialReduxState = {}', `initialReduxState=${JSON.stringify(store.getState())}`)
                     .replace(/\%PUBLIC_URL\%/g, '')
-                    .replace('</body>', '<script type="text/javascript" src="/static/js/bundle.js"></script>\n</body>')
+                    .replace('</body>', `<script type="text/javascript" src="/static/js/bundle.js"></script>\n${extraChunks.join()}</body>`)
                 res({
                     html: RenderedApp,
                     globals: { initialReduxState: store.getState() }
                 });
+            } else {
+                res({
+                    statusCode: context.status
+                })
             }
         })
     });
