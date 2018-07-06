@@ -20,11 +20,7 @@ namespace dotnet_cra_ssr
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc()
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
-            .AddRazorPagesOptions(opts =>
-            {
-                opts.Conventions.AddPageRoute("/Index", "fetchdata");
-            });
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -56,7 +52,7 @@ namespace dotnet_cra_ssr
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa =>
@@ -65,9 +61,11 @@ namespace dotnet_cra_ssr
 
                 if (env.IsDevelopment())
                 {
-                    // switched to this because its nice to not reboot
-                    // cra with backend changes
-                    spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
+                    // uncomment the following line and use `npm run start` from
+                    // a separate console to not have to restart node on backend changes
+                    // spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
+                    // this is for single start-up command. I prefer the line above
+                    spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
         }
