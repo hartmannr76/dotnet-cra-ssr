@@ -10,6 +10,8 @@ To start, generate your project and restore your dependencies
     cd ClientApp
     npm i
 
+## Client Setup
+
 While we are in the `ClientApp` area of the codebase, lets add the dependencies, files, and directory we are going to need.
 
     npm i aspnet-prerendering@^3.0.1 babel-register babel-preset-es2015 babel-preset-react-app ignore-styles --save
@@ -104,8 +106,59 @@ We also need to edit `ClientApp/public/index.html` to have
 </script>
 ```
 
+_Note:_ If you want to render `/fetchdata` on the server, you need to update `/ClientApp/src/FetchData.js` to use `componentDidMount` instead of `componentWillMount`.
+
+## Server Setup
+
+Starting with the `Startup.cs` file, we will need resources to actually invoke Node commands,
+so we will want to include the following
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    ...
+    // Adding the following for SSR
+    services.AddNodeServices();
+    services.AddSpaPrerenderer();
+}
+```
+
+I decided to add a `HomeController.cs` to my project, so I also updated the default route to be:
+
+```csharp
+routes.MapRoute(
+    name: "default",
+    template: "{controller=Home}/{action=Index}/{id?}");
+```
+
+Now, as mentioned above, add a `HomeController.cs` to the `/Controllers` directory, with the following code:
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SpaServices.Prerendering;
+using Newtonsoft.Json;
+
+namespace dotnet_cra_ssr.Controllers
+{
+    public class HomeController : Controller
+    {
+        // add whichever routes you want to prerender
+        [Route("/"), Route("/fetchdata"), Route("/counter")]
+        public async Task<IActionResult> Index([FromServices] ISpaPrerenderer prerenderer)
+        {
+            var initialState = JsonConvert.SerializeObject(new { counter = new { count = 99 } });
+            var prerenderResult = await prerenderer.RenderToString("./ClientApp/server/bootstrap", customDataParameter: initialState);
+
+            return Content(prerenderResult.Html, "text/html");
+        }
+    }
+}
+```
+
 # TODO
 
--   [ ] Update README to discuss changes on `Startup.cs` (already configured in this repo)
--   [ ] Update README to discuss new Razor pages (`Index.cs`, `Index.cshtml`) (already configured in this repo)
 -   [ ] Update handling on client routing 404 and Redirects

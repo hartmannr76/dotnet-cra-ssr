@@ -19,7 +19,8 @@ namespace dotnet_cra_ssr
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc()
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -51,7 +52,7 @@ namespace dotnet_cra_ssr
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa =>
@@ -60,6 +61,10 @@ namespace dotnet_cra_ssr
 
                 if (env.IsDevelopment())
                 {
+                    // uncomment the following line and use `npm run start` from
+                    // a separate console to not have to restart node on backend changes
+                    // spa.UseProxyToSpaDevelopmentServer("http://localhost:3000");
+                    // this is for single start-up command. I prefer the line above
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
